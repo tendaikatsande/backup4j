@@ -72,7 +72,7 @@ public class BackupServiceImpl implements BackupsService {
                 log.info("BackupConfig created successfully.");
                 Backup backup = new Backup();
                 backup.setBackupPath(backupConfig.getBackupPath());
-backup.setBackupConfig(backupConfig);
+                backup.setBackupConfig(backupConfig);
                 backupRepository.save(backup);
 
             } else {
@@ -99,7 +99,7 @@ backup.setBackupConfig(backupConfig);
                 // Provide the password file path
                 backupConfig.getDatabaseName()
         );
-// Set the PGPASSWORD environment variable with the database password
+        // Set the PGPASSWORD environment variable with the database password
         processBuilder.environment().put("PGPASSWORD", backupConfig.getPassword());
         processBuilder.redirectErrorStream(true);  // Redirect error stream to input stream
 
