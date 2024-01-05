@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -36,10 +37,21 @@ public class BackupServiceImpl implements BackupsService {
     }
     @Override
     public void createBackup(BackupRequest backupRequest) {
+        BackupConfig backupConfig = backupConfigService.get(backupRequest.getBackConfigId()).orElse(null);
+        if(backupConfig ==null) return;
+        // Get the home directory
+        String homeDirectory = System.getProperty("user.home");
+        // Specify the relative path for the backup file
+        String relativePath = "Documents/Dumps/"+backupConfig.getDatabaseName()+"/"+ Instant.now().toString() +".backup";
+        // Combine the home directory with the relative path
+        String backupPath = new File(homeDirectory, relativePath).getPath();
+        backupConfig.setBackupPath(backupPath);
+
+
         try {
 
             // Create the directory if it doesn't exist
-            File directory = new File(backupRequest.getBackupPath()).getParentFile();
+            File directory = new File(backupConfig.getBackupPath()).getParentFile();
             if (!directory.exists()) {
                 if (directory.mkdirs()) {
                     log.info("Directory created: {}", directory.getAbsolutePath());
@@ -49,7 +61,7 @@ public class BackupServiceImpl implements BackupsService {
                 }
             }
 
-            Process process = getProcess(backupRequest);
+            Process process = getProcess(backupConfig);
 
             logProcessOutput(process);
 
@@ -59,10 +71,8 @@ public class BackupServiceImpl implements BackupsService {
             if (exitCode == 0) {
                 log.info("BackupConfig created successfully.");
                 Backup backup = new Backup();
-                backup.setBackupPath(backupRequest.getBackupPath());
-
-                Optional<BackupConfig> config = backupConfigService.get(1l);
-                config.ifPresent(backup::setBackupConfig);
+                backup.setBackupPath(backupConfig.getBackupPath());
+backup.setBackupConfig(backupConfig);
                 backupRepository.save(backup);
 
             } else {
@@ -75,22 +85,22 @@ public class BackupServiceImpl implements BackupsService {
 
 
 
-    private static Process getProcess(BackupRequest backupRequest) throws IOException {
+    private static Process getProcess(BackupConfig backupConfig) throws IOException {
 
         ProcessBuilder processBuilder = new ProcessBuilder(
                 "pg_dump",
-                "-h", backupRequest.getHost(),
-                "-p", String.valueOf(backupRequest.getPort()),
-                "-U", backupRequest.getUsername(),
-                "-F", backupRequest.getFormat(),
-                backupRequest.isWithMetadata() ? "-b" : "",
-                backupRequest.isVerbose() ? "-v" : "",
-                "-f", backupRequest.getBackupPath(),
+                "-h", backupConfig.getHost(),
+                "-p", String.valueOf(backupConfig.getPort()),
+                "-U", backupConfig.getUsername(),
+                "-F", backupConfig.getFormat(),
+                backupConfig.isWithMetadata() ? "-b" : "",
+                backupConfig.isVerbose() ? "-v" : "",
+                "-f", backupConfig.getBackupPath(),
                 // Provide the password file path
-                backupRequest.getDatabaseName()
+                backupConfig.getDatabaseName()
         );
 // Set the PGPASSWORD environment variable with the database password
-        processBuilder.environment().put("PGPASSWORD", backupRequest.getPassword());
+        processBuilder.environment().put("PGPASSWORD", backupConfig.getPassword());
         processBuilder.redirectErrorStream(true);  // Redirect error stream to input stream
 
         return processBuilder.start();
@@ -104,7 +114,4 @@ public class BackupServiceImpl implements BackupsService {
             }
         }
     }
-
-
-
 }

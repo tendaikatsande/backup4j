@@ -24,8 +24,6 @@ public class BackupConfigController {
     @Autowired
     private BackupConfigService backupConfigService;
 
-
-
     @PostMapping
     public ResponseEntity<BackupConfig> create(@RequestBody @Validated BackupConfig backupConfig){
         backupConfig = backupConfigService.create(backupConfig);

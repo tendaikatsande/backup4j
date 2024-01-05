@@ -25,13 +25,6 @@ public class BackupController {
 
     @PostMapping("/create")
     public String createBackup(@RequestBody BackupRequest request) {
-        // Get the home directory
-        String homeDirectory = System.getProperty("user.home");
-        // Specify the relative path for the backup file
-        String relativePath = "Documents/Dumps/"+request.getDatabaseName()+"/"+ Instant.now().toString() +".backup";
-        // Combine the home directory with the relative path
-        String backupPath = new File(homeDirectory, relativePath).getPath();
-        request.setBackupPath(backupPath);
         backupsService.createBackup(request);
         return "Backup created successfully.";
     }
