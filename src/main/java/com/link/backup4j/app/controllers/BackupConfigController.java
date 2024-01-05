@@ -1,16 +1,16 @@
 package com.link.backup4j.app.controllers;
 
 import com.link.backup4j.app.dto.BackupRequest;
+import com.link.backup4j.app.models.Backup;
 import com.link.backup4j.app.models.BackupConfig;
 import com.link.backup4j.app.services.BackupConfigService;
 import com.link.backup4j.app.services.BackupsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.net.URI;
@@ -28,6 +28,11 @@ public class BackupConfigController {
     public ResponseEntity<BackupConfig> create(@RequestBody @Validated BackupConfig backupConfig){
         backupConfig = backupConfigService.create(backupConfig);
         return ResponseEntity.created(URI.create("/backups/"+backupConfig.getId())).body(backupConfig);
+    }
+
+    @GetMapping
+    public Page<BackupConfig> backupConfigs(Pageable pageable){
+        return  backupConfigService.getAll(pageable);
     }
 
 
