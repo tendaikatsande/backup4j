@@ -18,6 +18,7 @@ import java.time.Instant;
 
 @RestController
 @RequestMapping("/backup")
+@CrossOrigin
 public class BackupController {
 
     @Autowired

@@ -1,11 +1,13 @@
 package com.link.backup4j.app.services.impl;
 
 import com.link.backup4j.app.dto.BackupRequest;
+import com.link.backup4j.app.dto.EmailDetails;
 import com.link.backup4j.app.models.Backup;
 import com.link.backup4j.app.models.BackupConfig;
 import com.link.backup4j.app.repositories.BackupRepository;
 import com.link.backup4j.app.services.BackupConfigService;
 import com.link.backup4j.app.services.BackupsService;
+import com.link.backup4j.app.services.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +26,17 @@ import java.util.Optional;
 @Slf4j
 public class BackupServiceImpl implements BackupsService {
 
-    @Autowired
-    private BackupRepository backupRepository;
+    private final BackupRepository backupRepository;
 
-    @Autowired
-    private BackupConfigService backupConfigService;
+    private final BackupConfigService backupConfigService;
+
+    private final EmailService emailService;
+
+    public BackupServiceImpl(BackupRepository backupRepository, BackupConfigService backupConfigService, EmailService emailService) {
+        this.backupRepository = backupRepository;
+        this.backupConfigService = backupConfigService;
+        this.emailService = emailService;
+    }
 
 
     @Override
@@ -74,6 +82,11 @@ public class BackupServiceImpl implements BackupsService {
                 backup.setBackupPath(backupConfig.getBackupPath());
                 backup.setBackupConfig(backupConfig);
                 backupRepository.save(backup);
+
+                //send mail
+                EmailDetails details = EmailDetails.builder().recipient("cmugabe@csam.co.zw").msgBody("Backup").subject("Backup").attachment(backup.getBackupPath()).build();
+                emailService.sendMailWithAttachment(details);
+
 
             } else {
                 log.error("Error creating backup. Exit code: {}", exitCode);

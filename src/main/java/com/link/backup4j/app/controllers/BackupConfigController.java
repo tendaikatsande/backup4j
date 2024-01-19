@@ -18,6 +18,7 @@ import java.time.Instant;
 
 @RestController
 @RequestMapping("/backup-config")
+@CrossOrigin
 public class BackupConfigController {
 
 
