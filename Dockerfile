@@ -21,7 +21,7 @@ RUN ./mvnw package -DskipTests
 FROM openjdk:17-jdk-alpine
 
 # Copy the packaged JAR file from the build stage
-COPY --from=build /app/target/backup4j-0.0.1-SNAPSHOT.jar /app/app.jar
+COPY --from=build /app/target/app-0.0.1-SNAPSHOT.jar /app/app.jar
 
 # Set the entrypoint to run the application
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
