@@ -16,13 +16,14 @@ public class BackupConfig {
     @SequenceGenerator(name = "backup_config_gen", sequenceName = "backup_config_seq")
     @Column(name = "id", nullable = false)
     private Long id;
-
-    private String host;
+    @Builder.Default
+    private String host = "localhost";
     @Builder.Default
     private int port = 5432;
     private String username;
     private String password;
-    private String format;
+    @Builder.Default
+    private String format ="c";
     @Builder.Default
     private boolean withMetadata = true;
     @Builder.Default

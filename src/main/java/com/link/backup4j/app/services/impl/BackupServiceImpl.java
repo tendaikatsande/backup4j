@@ -9,8 +9,7 @@ import com.link.backup4j.app.services.BackupConfigService;
 import com.link.backup4j.app.services.BackupsService;
 import com.link.backup4j.app.services.EmailService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,17 +19,29 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.Instant;
-import java.util.Optional;
 
 @Service
 @Slf4j
 public class BackupServiceImpl implements BackupsService {
 
+    private static final String BACKUP_MESSAGE_SUBJECT = "Daily Database Backup Notification";
+    private static final String BACKUP_MESSAGE_BODY = "Dear User,\n\n"
+            + "We have successfully completed the daily backup process of the database. "
+            + "You can download the attached backup file for your records.\n\n"
+            + "File Details:\n"
+            + "- Subject: " + BACKUP_MESSAGE_SUBJECT + "\n"
+            + "- Description: " + "Backup file contains a snapshot of the database for archival purposes.\n"
+            + "- Note: This is an automated notification; no action is required from your end.\n\n"
+            + "Best Regards,\n"
+            + "Tendai Katsande";
     private final BackupRepository backupRepository;
 
     private final BackupConfigService backupConfigService;
 
     private final EmailService emailService;
+
+    @Value("${backup.db.notification.email}")
+    private String notificationEmail;
 
     public BackupServiceImpl(BackupRepository backupRepository, BackupConfigService backupConfigService, EmailService emailService) {
         this.backupRepository = backupRepository;
@@ -46,6 +57,12 @@ public class BackupServiceImpl implements BackupsService {
     @Override
     public void createBackup(BackupRequest backupRequest) {
         BackupConfig backupConfig = backupConfigService.get(backupRequest.getBackConfigId()).orElse(null);
+       createBackup(backupConfig);
+    }
+
+
+    @Override
+    public void createBackup(BackupConfig backupConfig) {
         if(backupConfig ==null) return;
         // Get the home directory
         String homeDirectory = System.getProperty("user.home");
@@ -80,11 +97,14 @@ public class BackupServiceImpl implements BackupsService {
                 log.info("BackupConfig created successfully.");
                 Backup backup = new Backup();
                 backup.setBackupPath(backupConfig.getBackupPath());
-                backup.setBackupConfig(backupConfig);
+                if(backupConfig.getId()!=null) {
+                    backup.setBackupConfig(backupConfig);
+                }
                 backupRepository.save(backup);
 
+
                 //send mail
-                EmailDetails details = EmailDetails.builder().recipient("cmugabe@csam.co.zw").msgBody("Backup").subject("Backup").attachment(backup.getBackupPath()).build();
+                EmailDetails details = EmailDetails.builder().recipient(notificationEmail).msgBody(BACKUP_MESSAGE_BODY).subject(BACKUP_MESSAGE_SUBJECT).attachment(backupConfig.getBackupPath()).build();
                 emailService.sendMailWithAttachment(details);
 
 
@@ -95,9 +115,6 @@ public class BackupServiceImpl implements BackupsService {
             log.error("BackupConfig process failed: {}", e.getMessage(), e);
         }
     }
-
-
-
     private static Process getProcess(BackupConfig backupConfig) throws IOException {
 
         ProcessBuilder processBuilder = new ProcessBuilder(
