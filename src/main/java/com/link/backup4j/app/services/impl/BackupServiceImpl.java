@@ -69,7 +69,7 @@ public class BackupServiceImpl implements BackupsService {
         // Specify the relative path for the backup file
         String relativePath = "Documents/Dumps/"+backupConfig.getDatabaseName()+"/"+ Instant.now().toString() +".backup";
         // Combine the home directory with the relative path
-        String backupPath = new File(homeDirectory, relativePath).getPath();
+        String backupPath = new File(homeDirectory, relativePath).getAbsolutePath();
         backupConfig.setBackupPath(backupPath);
 
 
