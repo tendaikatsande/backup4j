@@ -18,6 +18,9 @@ COPY src ./src/
 # Package the application without running tests
 RUN ./mvnw package -DskipTests
 
+# Set permissions for node
+RUN chmod +x /app/frontend/node/node
+
 # Start a new stage for the final image
 FROM openjdk:17-jdk-alpine
 
