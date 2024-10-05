@@ -19,7 +19,8 @@ COPY src ./src/
 RUN ./mvnw package -DskipTests
 
 # Set permissions for node
-RUN chmod +x /app/frontend/node/node
+RUN chmod +x /app/frontend/node/node && \
+    chmod -R u+rwX /app
 
 # Start a new stage for the final image
 FROM openjdk:17-jdk-alpine
