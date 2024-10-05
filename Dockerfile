@@ -11,6 +11,10 @@ COPY .mvn .mvn/
 # Copy the pom.xml file to cache dependencies
 COPY pom.xml ./
 
+# Install Node.js and Yarn (ensure permissions)
+RUN chmod +x /app/frontend/node/node
+RUN chmod -R +x /app/frontend/node/
+
 # Copy the source code
 COPY src ./src/
 
