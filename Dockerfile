@@ -17,7 +17,9 @@ RUN ./mvnw dependency:resolve
 COPY src ./src/
 
 # Build the application without running tests
-RUN ./mvnw package -DskipTests
+RUN ./mvnw package -DskipTests -Dnative-image.enabled=true -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
+  --enable-native-access=ALL-UNNAMED
+
 
 # Runtime stage
 FROM openjdk:24-ea-17-slim-bullseye
