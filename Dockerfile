@@ -1,5 +1,5 @@
 # Use OpenJDK 17 base image
-FROM openjdk:17-jdk-alpine AS build
+FROM openjdk:24-ea-17-slim-bullseye AS build
 
 # Set the working directory
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY src ./src/
 RUN ./mvnw package -DskipTests
 
 # Runtime stage
-FROM openjdk:17-jdk-alpine
+FROM openjdk:24-ea-17-slim-bullseye
 
 # Set the working directory
 WORKDIR /app
