@@ -1,5 +1,5 @@
 # Use OpenJDK 17 base image
-FROM openjdk:17-alpine AS build
+FROM amazoncorretto:17-alpine-jdk AS build
 
 # Set the working directory
 WORKDIR /app
@@ -21,7 +21,7 @@ RUN ./mvnw package -DskipTests
 
 
 # Runtime stage
-FROM openjdk:17-alpine
+FROM amazoncorretto:17-alpine-jdk
 
 # Set the working directory
 WORKDIR /app
