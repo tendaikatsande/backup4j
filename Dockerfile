@@ -17,8 +17,7 @@ RUN ./mvnw dependency:resolve
 COPY src ./src/
 
 # Build the application without running tests
-RUN ./mvnw package -DskipTests -Dnative-image.enabled=true -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
-  --enable-native-access=ALL-UNNAMED
+RUN ./mvnw package -DskipTests 
 
 
 # Runtime stage
