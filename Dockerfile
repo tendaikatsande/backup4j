@@ -1,5 +1,5 @@
-# Use Eclipse Temurin as an alternative to OpenJDK (better maintenance)
-FROM eclipse-temurin:17-jdk-alpine AS build
+# Use OpenJDK 17 base image
+FROM openjdk:17-jdk-alpine AS build
 
 # Set the working directory
 WORKDIR /app
@@ -13,19 +13,19 @@ RUN chmod +x mvnw
 COPY pom.xml ./
 RUN ./mvnw dependency:resolve
 
-# Copy source code
+# Copy the application source code
 COPY src ./src/
 
-# Package the application without running tests
+# Build the application without running tests
 RUN ./mvnw package -DskipTests
 
-# Start a new stage for the final image
-FROM eclipse-temurin:17-jdk-alpine
+# Runtime stage
+FROM openjdk:17-jdk-alpine
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the packaged JAR file from the build stage
+# Copy the built JAR file from the build stage
 COPY --from=build /app/target/app-0.0.1-SNAPSHOT.jar app.jar
 
 # Set the entrypoint to run the application
